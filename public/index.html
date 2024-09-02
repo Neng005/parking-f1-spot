@@ -339,7 +339,7 @@
             }
 
             if (data && data.temp) {
-              tempEl.children[0].textContent = `${data.temp} °C`;
+              tempEl.children[0].textContent = `${parseFloat(data.temp).toFixed(2)} °C`;
             }
 
             document.getElementById("system-mode-text").textContent = `${
