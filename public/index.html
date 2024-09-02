@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ระบบตรวจสอบที่จอดรถ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "IBM Plex Sans Thai", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #121212; /* Dark background for the entire page */
+        color: #e0e0e0; /* Light text color for readability */
+      }
+
+      .container {
+        width: 70%;
+        margin: 20px auto;
+        overflow: hidden;
+      }
+
+      .split {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .main {
+        display: flex;
+        gap: 24px;
+      }
+
+      .street {
+        padding: 40px;
+        background: #333333; /* Darker background for the street */
+        position: relative;
+        display: flex;
+        width: 70%;
+        flex-shrink: 0;
+        border-radius: 24px;
+        overflow: hidden;
+      }
+
+      .parking-space {
+        width: 100%;
+        height: 250px;
+        border-radius: 24px;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        border: 8px solid #ffcc00; /* Bright border color for contrast */
+        border-left: 0px;
+      }
+
+      .car {
+        position: absolute;
+        width: 100%;
+        bottom: 50%;
+        left: -100%;
+        transform: translate(-50%, 50%);
+        transition: left 1s ease-in-out;
+      }
+
+      .car.active {
+        left: 50%;
+      }
+
+      .system-off-x {
+        width: 100%;
+        position: absolute;
+        display: none;
+        bottom: 50%;
+        left: 50%;
+        transform: translate(-50%, 50%);
+      }
+
+      h1 {
+        font-size: 24px;
+        text-align: center;
+        color: #e0e0e0; /* Light color for headings */
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #444444; /* Darker background for slider */
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: #ffffff; /* White slider handle */
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: #21f360; /* Green background when active */
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+
+      #system-mode-text {
+        font-weight: 500;
+        font-size: 1.2em;
+        color: #e0e0e0; /* Light color for system mode text */
+      }
+
+      .info-panel {
+        width: 100%;
+        padding: 40px 0;
+        display: flex;
+        justify-items: space-between;
+        align-items: center;
+        gap: 24px;
+      }
+
+      .info-item {
+        width: 100%;
+        background-color: #333333; /* Dark background for info items */
+        padding: 24px;
+        border-radius: 24px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Darker shadow */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #e0e0e0; /* Light text color */
+      }
+
+      .info-item.active {
+        background-color: #21f360; /* Green background when active */
+        color: #121212; /* Dark text for contrast on active state */
+      }
+
+      .info-item.inactive {
+        background-color: #eb2c1f; /* Red background for inactive state */
+        color: #ffffff; /* White text for contrast */
+      }
+
+      .info-item.disabled {
+        background-color: #555555; /* Gray background for disabled state */
+        color: #a9a9a9; /* Light gray text */
+        pointer-events: none;
+      }
+
+      .info-divide {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .info-text {
+        font-size: 1.2em;
+        font-weight: 500;
+        color: #e0e0e0; /* Light text for info text */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="split">
+        <div class="main">
+          <div class="street">
+            <div class="parking-space"></div>
+            <img
+              src="https://www.acfligue.org/wp-content/uploads/2023/02/custom_showroom_1677516848-1024x576.png"
+              alt="car"
+              class="car"
+            />
+            <img
+              src="https://www.pngall.com/wp-content/uploads/13/Police-Tape-Crime-PNG-Images.png"
+              alt="system-off"
+              class="system-off-x"
+            />
+          </div>
+          <div class="info-item" id="info-switch">
+            <div class="info-divide">
+              <label class="switch">
+                <input type="checkbox" id="system-mode-switch" />
+                <span class="slider"></span>
+              </label>
+              <p id="system-mode-text"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-item" id="status">
+            <div class="info-text">&nbsp;</div>
+          </div>
+          <div class="info-item" id="temp">
+            <div class="info-text">&nbsp;</div>
+          </div>
+          <div class="info-item" id="duration">
+            <div class="info-text">00:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let timer;
+      let elapsedSeconds = 0;
+      let isActive = false;
+
+      function startTimer() {
+        timer = setInterval(() => {
+          elapsedSeconds++;
+          document
+            .getElementById("duration")
+            .querySelector(".info-text").textContent =
+            formatTime(elapsedSeconds);
+        }, 1000); // Update every second
+      }
+
+      function stopTimer() {
+        clearInterval(timer);
+        elapsedSeconds = 0;
+        document
+          .getElementById("duration")
+          .querySelector(".info-text").textContent = formatTime(elapsedSeconds);
+      }
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
+          2,
+          "0"
+        )}`;
+      }
+
+      function toggleSystemMode() {
+        const systemModeSwitch = document.getElementById("system-mode-switch");
+        const isSystemModeOn = systemModeSwitch.checked;
+        const modeText = isSystemModeOn ? "system-on" : "system-off";
+
+        document.getElementById("system-mode-text").textContent = `${
+          isSystemModeOn ? "เปิดใช้งาน" : "ปิดใช้งาน"
+        }`;
+
+        fetch(`/publish`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: modeText }),
+        }).catch((error) => console.error("Error:", error));
+
+        fetch("/api/system", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ system_on: isSystemModeOn }),
+        }).catch((error) =>
+          console.error("Error updating power status:", error)
+        );
+      }
+
+      function fetchData() {
+        fetch("/api/status")
+          .then((response) => response.json())
+          .then((data) => {
+            const carElement = document.querySelector(".car");
+            const systemOffXElement = document.querySelector(".system-off-x");
+            const systemModeSwitch =
+              document.getElementById("system-mode-switch");
+            const statusEl = document.getElementById("status");
+            const tempEl = document.getElementById("temp");
+            const infoSwitchEl = document.getElementById("info-switch");
+
+            if (data && data.status === true) {
+              statusEl.classList.remove("active");
+              carElement.classList.add("active");
+              statusEl.classList.add("inactive");
+              statusEl.children[0].textContent = "เต็ม";
+              infoSwitchEl.classList.add("disabled");
+
+              if (!isActive) {
+                startTimer();
+                isActive = true;
+              }
+            } else {
+              statusEl.classList.add("active");
+              statusEl.classList.remove("inactive");
+              carElement.classList.remove("active");
+              statusEl.children[0].textContent = "ว่าง";
+              infoSwitchEl.classList.remove("disabled");
+
+              if (isActive) {
+                stopTimer();
+                isActive = false;
+              }
+            }
+
+            if (data && data.system_on === false) {
+              systemOffXElement.style.display = "block";
+            } else {
+              systemOffXElement.style.display = "none";
+            }
+
+            if (data && data.temp) {
+              tempEl.children[0].textContent = `${data.temp} °C`;
+            }
+
+            document.getElementById("system-mode-text").textContent = `${
+              data.system_on ? "เปิดใช้งาน" : "ปิดใช้งาน"
+            }`;
+            systemModeSwitch.checked = data.system_on;
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Initial fetch of data
+      fetchData();
+
+      setInterval(fetchData, 1000);
+
+      document
+        .getElementById("system-mode-switch")
+        .addEventListener("change", toggleSystemMode);
+    </script>
+  </body>
+</html>
